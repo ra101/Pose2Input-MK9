@@ -27,5 +27,33 @@ class TranslatePose:
                 for func in self.all_transaltion_funcs if func(landmark_list)
         ])
 
-    def move_up(self, landmark_list):
-        return True
+
+    def move_front_punch(self, landmark_list):
+        return self._move_punch(
+            wrist=landmark_list[LandmarkIndexEnum.LEFT_WRIST],
+            elbow=landmark_list[LandmarkIndexEnum.LEFT_ELBOW],
+            shoulder=landmark_list[LandmarkIndexEnum.LEFT_SHOULDER]
+        )
+
+    def move_back_punch(self, landmark_list):
+        return self._move_punch(
+            wrist=landmark_list[LandmarkIndexEnum.RIGHT_WRIST],
+            elbow=landmark_list[LandmarkIndexEnum.RIGHT_ELBOW],
+            shoulder=landmark_list[LandmarkIndexEnum.RIGHT_SHOULDER]
+        )
+
+    def _move_punch(self, wrist, elbow, shoulder):
+        if np.average([
+            elbow.visibility + wrist.visibility + shoulder.visibility
+        ]) < 0.9:
+            return False
+
+        elbow_to_wrist = np.complex(wrist.x - elbow.x, wrist.y - elbow.y)
+        elbow_to_shoulder = np.complex(shoulder.x - elbow.x , shoulder.y - elbow.y)
+
+        wrist_to_shoulder = np.complex(shoulder.x - wrist.x , shoulder.y - wrist.y)
+
+        if abs(np.angle(elbow_to_wrist) + np.angle(elbow_to_shoulder)) > 2.8:
+            if abs(np.angle(wrist_to_shoulder) > 2.8):
+                return True
+        return False
