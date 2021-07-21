@@ -1,7 +1,15 @@
+import pyautogui
+import numpy as np
+
 from constants import InputConfig, LandmarkIndexEnum
 
+def input_keys(inputs):
+    for key in inputs:
+        pyautogui.keyDown(key)
+    for key in reversed(inputs):
+        pyautogui.keyUp(key)
 
-def moves_to_input(movelist):
+def moves_to_keystroke(movelist):
     return [
         getattr(InputConfig, move).value for move in movelist
     ]

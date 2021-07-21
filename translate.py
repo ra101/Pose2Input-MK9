@@ -2,19 +2,14 @@ import time
 from datetime import datetime
 
 import cv2
-import pyautogui
 from mediapipe import solutions as mp_solns
 
 from constants import landmarks_connections
-from utils import TranslatePose, moves_to_input
+from utils import TranslatePose, moves_to_keystroke, input_keys
 
-
-pyautogui.PAUSE = 0
-pyautogui.MINIMUM_DURATION = 0
-pyautogui.MINIMUM_DURATION = 0
 
 def translate(
-    camera_port=0, debug_level=0, log_flag=False, live_flag=False
+    camera_port="0", debug_level=0, log_flag=False, live_flag=False
 ):
     camera_port = int(camera_port) if camera_port.isdigit() else camera_port
 
@@ -27,9 +22,8 @@ def translate(
         raise cv2.error("Invalid Video Source")
 
     height, width, channel = prv_img.shape
-    print(prv_img.shape)
 
-    motion_theshold = height * width * channel * 255 // 32
+    motion_theshold = height * width * channel * 255 // 48
 
     pose = mp_solns.pose.Pose()
 
@@ -70,8 +64,8 @@ def translate(
         movelist = []
         if motion_detected and pose_landmarks:
             movelist = translate_pose.process(pose_landmarks.landmark)
-            inputs = moves_to_input(movelist)
-            pyautogui.hotkey(*inputs, _pause=0)
+            inputs = moves_to_keystroke(movelist)
+            input_keys(inputs)
 
         if debug_level > 0:
             cur_time = time.time()

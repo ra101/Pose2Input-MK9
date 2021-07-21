@@ -2,6 +2,7 @@ import os
 import time
 import argparse
 
+import pyautogui
 from dotenv import load_dotenv
 
 from translate import translate
@@ -10,6 +11,10 @@ from translate import translate
 if __name__ == "__main__":
 
     load_dotenv()
+
+    pyautogui.PAUSE = float(os.getenv('PYAUTO_PAUSE', 0.1))
+    pyautogui.MINIMUM_DURATION = float(os.getenv('PYAUTO_MINIMUM_DURATION', 0.1))
+    pyautogui.MINIMUM_SLEEP = float(os.getenv('PYAUTO_MINIMUM_SLEEP', 0))
 
     parser = argparse.ArgumentParser(
         prog="Pose2Input-MKKE",
@@ -29,7 +34,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    time.sleep(int(os.getenv('DELAY_TIME', "0")))
+    time.sleep(int(os.getenv('DELAY_TIME', 0)))
 
     live_flag = args.live_flag
     log_flag = args.log_flag
