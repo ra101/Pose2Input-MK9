@@ -50,10 +50,11 @@ class TranslatePose:
 
         elbow_to_wrist = np.complex(wrist.x - elbow.x, wrist.y - elbow.y)
         elbow_to_shoulder = np.complex(shoulder.x - elbow.x , shoulder.y - elbow.y)
-
         wrist_to_shoulder = np.complex(shoulder.x - wrist.x , shoulder.y - wrist.y)
 
-        if abs(np.angle(elbow_to_wrist) + np.angle(elbow_to_shoulder)) > 2.8:
-            if abs(np.angle(wrist_to_shoulder) > 2.8):
+        if abs(np.sin(
+            np.angle(elbow_to_wrist) + np.angle(elbow_to_shoulder
+        ))) < 0.18:
+            if abs(np.sin(np.angle(wrist_to_shoulder))) < 0.18:
                 return True
         return False
