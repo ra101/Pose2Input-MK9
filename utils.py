@@ -29,19 +29,34 @@ class TranslatePose:
 
     def move_left(self, landmark_list):
         return self._move_x_direction(
-            right_ankle=landmark_list[LandmarkIndexEnum.RIGHT_ANKLE],
-            left_ankle=landmark_list[LandmarkIndexEnum.LEFT_ANKLE],
+            r_ankle=landmark_list[LandmarkIndexEnum.RIGHT_ANKLE],
+            l_ankle=landmark_list[LandmarkIndexEnum.LEFT_ANKLE],
             hip=landmark_list[LandmarkIndexEnum.RIGHT_HIP],
             right=False
         )
 
     def move_right(self, landmark_list):
         return self._move_x_direction(
-            right_ankle=landmark_list[LandmarkIndexEnum.RIGHT_ANKLE],
-            left_ankle=landmark_list[LandmarkIndexEnum.LEFT_ANKLE],
+            r_ankle=landmark_list[LandmarkIndexEnum.RIGHT_ANKLE],
+            l_ankle=landmark_list[LandmarkIndexEnum.LEFT_ANKLE],
             hip=landmark_list[LandmarkIndexEnum.LEFT_HIP],
             right=True
         )
+
+    def _move_x_direction(
+        self, r_ankle, l_ankle, hip, right=True):
+        if np.average([
+            r_ankle.visibility + l_ankle.visibility + hip.visibility
+        ]) < 0.9:
+            return False
+
+        median_of_body_x = (r_ankle.x + l_ankle.x)/2
+
+        if right and median_of_body_x > hip.x:
+            return True
+        if not right and median_of_body_x < hip.x:
+            return True
+        return False
 
     def move_front_punch(self, landmark_list):
         return self._move_punch(
@@ -57,21 +72,6 @@ class TranslatePose:
             shoulder=landmark_list[LandmarkIndexEnum.RIGHT_SHOULDER]
         )
 
-    def _move_x_direction(
-        self, right_ankle, left_ankle, hip, right=True):
-        if np.average([
-            right_ankle.visibility + left_ankle.visibility + hip.visibility
-        ]) < 0.9:
-            return False
-
-        median_of_body_x = (right_ankle.x + left_ankle.x)/2
-
-        if right and median_of_body_x > hip.x:
-            return True
-        if not right and median_of_body_x < hip.x:
-            return True
-        return False
-
     def _move_punch(self, wrist, elbow, shoulder):
         if np.average([
             elbow.visibility + wrist.visibility + shoulder.visibility
@@ -83,8 +83,62 @@ class TranslatePose:
         wrist_to_shoulder = np.complex(shoulder.x - wrist.x , shoulder.y - wrist.y)
 
         if abs(np.sin(
-            np.angle(elbow_to_wrist) + np.angle(elbow_to_shoulder
-        ))) < 0.18:
+            np.angle(elbow_to_wrist) + np.angle(elbow_to_shoulder)
+        )) < 0.18:
             if abs(np.sin(np.angle(wrist_to_shoulder))) < 0.18:
                 return True
         return False
+
+    def move_throw(self, landmark_list):
+        nose = landmark_list[LandmarkIndexEnum.NOSE]
+        if nose.visibility < 0.9:
+            return False
+
+        r_wrist = landmark_list[LandmarkIndexEnum.RIGHT_WRIST]
+        r_elbow = landmark_list[LandmarkIndexEnum.RIGHT_ELBOW]
+        l_wrist = landmark_list[LandmarkIndexEnum.LEFT_WRIST]
+        l_elbow = landmark_list[LandmarkIndexEnum.LEFT_ELBOW]
+
+        if np.average(r_wrist.visibility + r_elbow.visibility) > 0.9:
+            if r_wrist.y < r_elbow.y < nose.y:
+                return True
+
+        if np.average(l_wrist.visibility + l_elbow.visibility) > 0.9:
+            if l_wrist.y < l_elbow.y < nose.y :
+                return True
+
+    def move_tag(self, landmark_list):
+        r_wrist = landmark_list[LandmarkIndexEnum.RIGHT_WRIST]
+        r_elbow = landmark_list[LandmarkIndexEnum.RIGHT_ELBOW]
+        l_wrist = landmark_list[LandmarkIndexEnum.LEFT_WRIST]
+        l_elbow = landmark_list[LandmarkIndexEnum.LEFT_ELBOW]
+
+        if np.average(
+            r_wrist.visibility + l_wrist.visibility +
+            r_elbow.visibility + l_elbow.visibility
+        ) < 0.9:
+            return False
+
+        wrist_to_wrist = np.complex(r_wrist.x - l_wrist.x , r_wrist.y - l_wrist.y)
+
+        if abs(np.sin(np.angle(wrist_to_wrist))) < 0.18:
+            if abs(r_wrist.x - l_wrist.x) / abs(r_elbow.x - l_elbow.x) < 0.3:
+                return True
+
+    def move_block(self, landmark_list):
+        nose = landmark_list[LandmarkIndexEnum.NOSE]
+        if nose.visibility < 0.9:
+            return False
+
+        r_wrist = landmark_list[LandmarkIndexEnum.RIGHT_WRIST]
+        r_elbow = landmark_list[LandmarkIndexEnum.RIGHT_ELBOW]
+        l_wrist = landmark_list[LandmarkIndexEnum.LEFT_WRIST]
+        l_elbow = landmark_list[LandmarkIndexEnum.LEFT_ELBOW]
+
+        if np.average(r_wrist.visibility + r_elbow.visibility) > 0.9:
+            if r_wrist.y < nose.y < r_elbow.y:
+                return True
+
+        if np.average(l_wrist.visibility + l_elbow.visibility) > 0.9:
+            if l_wrist.y < nose.y < l_elbow.y:
+                return True
