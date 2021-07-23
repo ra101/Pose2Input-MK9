@@ -27,6 +27,21 @@ class TranslatePose:
                 for func in self.all_transaltion_funcs if func(landmark_list)
         ])
 
+    def move_left(self, landmark_list):
+        return self._move_x_direction(
+            right_ankle=landmark_list[LandmarkIndexEnum.RIGHT_ANKLE],
+            left_ankle=landmark_list[LandmarkIndexEnum.LEFT_ANKLE],
+            hip=landmark_list[LandmarkIndexEnum.RIGHT_HIP],
+            right=False
+        )
+
+    def move_right(self, landmark_list):
+        return self._move_x_direction(
+            right_ankle=landmark_list[LandmarkIndexEnum.RIGHT_ANKLE],
+            left_ankle=landmark_list[LandmarkIndexEnum.LEFT_ANKLE],
+            hip=landmark_list[LandmarkIndexEnum.LEFT_HIP],
+            right=True
+        )
 
     def move_front_punch(self, landmark_list):
         return self._move_punch(
@@ -41,6 +56,21 @@ class TranslatePose:
             elbow=landmark_list[LandmarkIndexEnum.RIGHT_ELBOW],
             shoulder=landmark_list[LandmarkIndexEnum.RIGHT_SHOULDER]
         )
+
+    def _move_x_direction(
+        self, right_ankle, left_ankle, hip, right=True):
+        if np.average([
+            right_ankle.visibility + left_ankle.visibility + hip.visibility
+        ]) < 0.9:
+            return False
+
+        median_of_body_x = (right_ankle.x + left_ankle.x)/2
+
+        if right and median_of_body_x > hip.x:
+            return True
+        if not right and median_of_body_x < hip.x:
+            return True
+        return False
 
     def _move_punch(self, wrist, elbow, shoulder):
         if np.average([
