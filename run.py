@@ -1,3 +1,4 @@
+from logging import log
 import os
 import time
 import argparse
@@ -47,8 +48,12 @@ if __name__ == "__main__":
         os.mkdir('logs')
 
     translate(
-        camera_port=os.getenv('CAMERA_PORT', '0'),
-        debug_level=debug_level,
-        live_flag=live_flag,
         log_flag=log_flag,
+        live_flag=live_flag,
+        debug_level=debug_level,
+        log_fps=int(os.getenv('LOG_FPS', 20)),
+        camera_port=os.getenv('CAMERA_PORT', '0'),
+        motion_threshold_invese_factor=int(
+            os.getenv('MOTION_THRESHOLD_INVESE_FACTOR', 48)
+        ),
     )

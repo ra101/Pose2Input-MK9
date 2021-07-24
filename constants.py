@@ -2,14 +2,10 @@ import os
 import enum
 
 from dotenv import load_dotenv
-from mediapipe import solutions
+
 
 load_dotenv()
 
-
-landmarks_connections = solutions.pose.POSE_CONNECTIONS
-
-LandmarkIndexEnum = solutions.pose.PoseLandmark
 
 @enum.unique
 class InputConfig(enum.Enum):

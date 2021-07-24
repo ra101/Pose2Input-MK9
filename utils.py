@@ -1,7 +1,10 @@
 import pyautogui
 import numpy as np
 
-from constants import InputConfig, LandmarkIndexEnum
+from constants import InputConfig
+from mediapipe.python.solutions.pose import (
+    PoseLandmark as LandmarkIndexEnum
+)
 
 def input_keys(inputs):
     for key in inputs:

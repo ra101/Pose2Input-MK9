@@ -1,15 +1,19 @@
+from shutil import move
 import time
 from datetime import datetime
 
 import cv2
-from mediapipe import solutions as mp_solns
+from mediapipe.python.solutions import(
+    drawing_utils as mp_drawing_utils,
+    pose as mp_pose
+)
 
-from constants import landmarks_connections
 from utils import TranslatePose, moves_to_keystroke, input_keys
 
 
 def translate(
-    camera_port="0", debug_level=0, log_flag=False, live_flag=False
+    log_flag=False, live_flag=False, debug_level=0, log_fps=20,
+    camera_port="0", motion_threshold_invese_factor=48
 ):
     camera_port = int(camera_port) if camera_port.isdigit() else camera_port
 
@@ -23,14 +27,14 @@ def translate(
 
     height, width, channel = prv_img.shape
 
-    motion_theshold = height * width * channel * 255 // 48
+    motion_theshold = height * width * channel * 255 // motion_threshold_invese_factor
 
-    pose = mp_solns.pose.Pose()
+    pose = mp_pose.Pose()
 
     if log_flag:
         video_log = cv2.VideoWriter(
-            f"logs/log_{datetime.now().strftime('%Y-%M-%d_%H-%m-%S')}.avi",
-            cv2.VideoWriter_fourcc(*"XVID"), 24, (width, height)
+            f"logs/log_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.avi",
+            cv2.VideoWriter_fourcc(*"XVID"), log_fps, (width, height)
         )
 
     if log_flag:
@@ -39,7 +43,10 @@ def translate(
 
     if debug_level > 0:
         cur_time = 0
-        cv_font_vars = (cv2.FONT_HERSHEY_PLAIN, 2, (255,0,0), 2)
+        cv_font_vars_outline = (cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 4)
+        cv_font_vars = (cv2.FONT_HERSHEY_PLAIN, 2, (255,0, 0), 2)
+        fps_coord = (width - 100, 50)
+        movelist_coord = (50, height - 50)
 
 
     while cv2.waitKey(1) & 0xFF != 27:
@@ -71,8 +78,8 @@ def translate(
             cur_time = time.time()
 
         if debug_level > 1 and pose_landmarks:
-            mp_solns.drawing_utils.draw_landmarks(
-                img, pose_landmarks, landmarks_connections
+            mp_drawing_utils.draw_landmarks(
+                img, pose_landmarks, mp_pose.POSE_CONNECTIONS
             )
 
         if debug_level > 2 and not motion_detected:
@@ -81,13 +88,11 @@ def translate(
         if debug_level > 0:
             fps = 1/(cur_time - prv_time)
 
-            cv2.putText(
-                img, f"{fps:.2f}", (width - 100, 50), *cv_font_vars
-            )
+            cv2.putText(img, f"{fps:.2f}", fps_coord, *cv_font_vars_outline)
+            cv2.putText(img, f"{fps:.2f}", fps_coord, *cv_font_vars)
 
-            cv2.putText(
-                img, f"{list(movelist)}", (50, height - 50), *cv_font_vars
-            )
+            cv2.putText(img, f"{list(movelist)}", movelist_coord, *cv_font_vars_outline)
+            cv2.putText(img, f"{list(movelist)}", movelist_coord, *cv_font_vars)
 
 
         if live_flag:
