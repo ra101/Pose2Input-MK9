@@ -52,10 +52,16 @@ class TranslatePose:
 
         median_of_body_x = (r_ankle.x + l_ankle.x)/2
 
-        if right and median_of_body_x > hip.x:
-            return True
-        if not right and median_of_body_x < hip.x:
-            return True
+        l_ankle_to_hip = np.complex(hip.x - l_ankle.x, hip.y - l_ankle.y)
+        r_ankle_to_hip = np.complex(hip.x - r_ankle.x, hip.y - r_ankle.y)
+
+        if np.average(np.abs([
+            np.sin(np.angle(l_ankle_to_hip)) , np.sin(np.angle(r_ankle_to_hip))
+        ])) > 0.95:
+            if right and median_of_body_x > hip.x:
+                return True
+            if not right and median_of_body_x < hip.x:
+                return True
         return False
 
     def move_front_punch(self, landmark_list):
@@ -87,6 +93,28 @@ class TranslatePose:
         )) < 0.18:
             if abs(np.sin(np.angle(wrist_to_shoulder))) < 0.18:
                 return True
+        return False
+
+    def move_front_kick(self, landmark_list):
+        return self._move_kick(
+            hip=landmark_list[LandmarkIndexEnum.LEFT_HIP],
+            ankle=landmark_list[LandmarkIndexEnum.LEFT_ANKLE],
+        )
+
+    def move_back_kick(self, landmark_list):
+        return self._move_kick(
+            hip=landmark_list[LandmarkIndexEnum.RIGHT_HIP],
+            ankle=landmark_list[LandmarkIndexEnum.RIGHT_ANKLE],
+        )
+
+    def _move_kick(self, hip, ankle):
+        if np.average([hip.visibility + ankle.visibility]) < 0.9:
+            return False
+
+        ankle_to_hip = np.complex(hip.x - ankle.x, hip.y - ankle.y)
+
+        if abs(np.sin(np.angle(ankle_to_hip))) < 0.7:
+            return True
         return False
 
     def move_throw(self, landmark_list):
