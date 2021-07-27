@@ -30,6 +30,46 @@ class TranslatePose:
                 for func in self.all_transaltion_funcs if func(landmark_list)
         ])
 
+    def move_up(self, landmark_list):
+        r_ankle = landmark_list[LandmarkIndexEnum.RIGHT_ANKLE]
+        l_ankle=landmark_list[LandmarkIndexEnum.LEFT_ANKLE]
+        r_knee = landmark_list[LandmarkIndexEnum.RIGHT_KNEE]
+        l_knee=landmark_list[LandmarkIndexEnum.LEFT_KNEE]
+
+        if np.average([
+            l_ankle.visibility, r_ankle.visibility,
+            l_knee.visibility, r_knee.visibility
+        ]) < 0.95:
+            return False
+
+        if  (l_ankle.y + r_ankle.y) < (r_knee.y + l_knee.y):
+            return True
+        return False
+
+    def move_down(self, landmark_list):
+        r_hip = landmark_list[LandmarkIndexEnum.RIGHT_HIP]
+        l_hip=landmark_list[LandmarkIndexEnum.LEFT_HIP]
+        r_knee = landmark_list[LandmarkIndexEnum.RIGHT_KNEE]
+        l_knee=landmark_list[LandmarkIndexEnum.LEFT_KNEE]
+        nose=landmark_list[LandmarkIndexEnum.NOSE]
+
+        if np.average([
+            r_hip.visibility, l_hip.visibility, r_knee.visibility,
+            l_knee.visibility, nose.visibility
+        ]) < 0.95:
+            return False
+
+        hip = np.complex(0, (r_hip.y + l_hip.y)/2)
+        knee = np.complex(0, (r_knee.y + l_knee.y)/2)
+        nose = np.complex(0, nose.y)
+
+        knee_to_nose = knee - nose
+        hip_to_nose = hip - nose
+
+        if abs(hip_to_nose)/abs(knee_to_nose) > 0.7:
+            return True
+        return False
+
     def move_left(self, landmark_list):
         return self._move_x_direction(
             r_ankle=landmark_list[LandmarkIndexEnum.RIGHT_ANKLE],
