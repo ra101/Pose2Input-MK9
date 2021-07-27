@@ -39,7 +39,7 @@ class TranslatePose:
         if np.average([
             l_ankle.visibility, r_ankle.visibility,
             l_knee.visibility, r_knee.visibility
-        ]) < 0.95:
+        ]) < 0.9:
             return False
 
         if  (l_ankle.y + r_ankle.y) < (r_knee.y + l_knee.y):
@@ -56,7 +56,7 @@ class TranslatePose:
         if np.average([
             r_hip.visibility, l_hip.visibility, r_knee.visibility,
             l_knee.visibility, nose.visibility
-        ]) < 0.95:
+        ]) < 0.9:
             return False
 
         hip = np.complex(0, (r_hip.y + l_hip.y)/2)
@@ -90,7 +90,7 @@ class TranslatePose:
         self, r_ankle, l_ankle, hip, right=True):
         if np.average([
             r_ankle.visibility, l_ankle.visibility, hip.visibility
-        ]) < 0.95:
+        ]) < 0.9:
             return False
 
         median_of_body_x = (r_ankle.x + l_ankle.x)/2
@@ -100,7 +100,7 @@ class TranslatePose:
 
         if np.average(np.abs([
             np.sin(np.angle(l_ankle_to_hip)) , np.sin(np.angle(r_ankle_to_hip))
-        ])) > 0.95:
+        ])) > 0.9:
             if right and median_of_body_x > hip.x:
                 return True
             if not right and median_of_body_x < hip.x:
@@ -124,7 +124,7 @@ class TranslatePose:
     def _move_punch(self, wrist, elbow, shoulder):
         if np.average([
             elbow.visibility, wrist.visibility, shoulder.visibility
-        ]) < 0.95:
+        ]) < 0.9:
             return False
 
         elbow_to_wrist = np.complex(wrist.x - elbow.x, wrist.y - elbow.y)
@@ -151,7 +151,7 @@ class TranslatePose:
         )
 
     def _move_kick(self, hip, ankle):
-        if np.average([hip.visibility, ankle.visibility]) < 0.95:
+        if np.average([hip.visibility, ankle.visibility]) < 0.9:
             return False
 
         ankle_to_hip = np.complex(hip.x - ankle.x, hip.y - ankle.y)
@@ -162,7 +162,7 @@ class TranslatePose:
 
     def move_throw(self, landmark_list):
         nose = landmark_list[LandmarkIndexEnum.NOSE]
-        if nose.visibility < 0.95:
+        if nose.visibility < 0.9:
             return False
 
         r_wrist = landmark_list[LandmarkIndexEnum.RIGHT_WRIST]
@@ -170,11 +170,11 @@ class TranslatePose:
         l_wrist = landmark_list[LandmarkIndexEnum.LEFT_WRIST]
         l_elbow = landmark_list[LandmarkIndexEnum.LEFT_ELBOW]
 
-        if np.average([r_wrist.visibility, r_elbow.visibility]) > 0.95:
+        if np.average([r_wrist.visibility, r_elbow.visibility]) > 0.9:
             if r_wrist.y < r_elbow.y < nose.y:
                 return True
 
-        if np.average([l_wrist.visibility, l_elbow.visibility]) > 0.95:
+        if np.average([l_wrist.visibility, l_elbow.visibility]) > 0.9:
             if l_wrist.y < l_elbow.y < nose.y :
                 return True
 
@@ -187,7 +187,7 @@ class TranslatePose:
         if np.average([
             r_wrist.visibility, l_wrist.visibility,
             r_elbow.visibility, l_elbow.visibility
-        ]) < 0.95:
+        ]) < 0.9:
             return False
 
         wrist_to_wrist = np.complex(r_wrist.x - l_wrist.x , r_wrist.y - l_wrist.y)
@@ -198,7 +198,7 @@ class TranslatePose:
 
     def move_block(self, landmark_list):
         nose = landmark_list[LandmarkIndexEnum.NOSE]
-        if nose.visibility < 0.95:
+        if nose.visibility < 0.9:
             return False
 
         r_wrist = landmark_list[LandmarkIndexEnum.RIGHT_WRIST]
@@ -206,10 +206,10 @@ class TranslatePose:
         l_wrist = landmark_list[LandmarkIndexEnum.LEFT_WRIST]
         l_elbow = landmark_list[LandmarkIndexEnum.LEFT_ELBOW]
 
-        if np.average([r_wrist.visibility, r_elbow.visibility]) > 0.95:
+        if np.average([r_wrist.visibility, r_elbow.visibility]) > 0.9:
             if r_wrist.y < nose.y < r_elbow.y:
                 return True
 
-        if np.average([l_wrist.visibility, l_elbow.visibility]) > 0.95:
+        if np.average([l_wrist.visibility, l_elbow.visibility]) > 0.9:
             if l_wrist.y < nose.y < l_elbow.y:
                 return True
