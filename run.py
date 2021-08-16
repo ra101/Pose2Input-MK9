@@ -1,4 +1,5 @@
-from logging import log
+# ./run.py
+
 import os
 import time
 import argparse
@@ -13,9 +14,8 @@ if __name__ == "__main__":
 
     load_dotenv()
 
+    # Time (sec) to pause after each PyAuto Function Call
     pyautogui.PAUSE = float(os.getenv('PYAUTO_PAUSE', 0.1))
-    pyautogui.MINIMUM_DURATION = float(os.getenv('PYAUTO_MINIMUM_DURATION', 0.1))
-    pyautogui.MINIMUM_SLEEP = float(os.getenv('PYAUTO_MINIMUM_SLEEP', 0))
 
     parser = argparse.ArgumentParser(
         prog="Pose2Input-MKKE",
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '-d', '--debug_level', type=int, metavar='', default=0,
-        help='[0, 1, 2, 3] set different levels of information for logs or live feed'
+        help='<0, 1, 2, 3> set different levels of information for logs or live feed'
     )
     parser.add_argument(
         '-l', '--log_flag', action='store_true',
@@ -35,12 +35,15 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    # A Delay before Starting the Program
     time.sleep(int(os.getenv('DELAY_TIME', 0)))
 
     live_flag = args.live_flag
     log_flag = args.log_flag
     debug_level = args.debug_level
 
+    # If Debug > 0 and no flag is selected
+    # Then log_flag is automatically set to True
     if (debug_level > 0) and not (log_flag or live_flag):
         log_flag = True
 
@@ -53,7 +56,7 @@ if __name__ == "__main__":
         debug_level=debug_level,
         log_fps=int(os.getenv('LOG_FPS', 20)),
         camera_port=os.getenv('CAMERA_PORT', '0'),
-        motion_threshold_invese_factor=int(
-            os.getenv('MOTION_THRESHOLD_INVESE_FACTOR', 48)
+        motion_threshold_factor=int(
+            os.getenv('MOTION_THRESHOLD_FACTOR', 64)
         ),
     )

@@ -1,4 +1,5 @@
-from shutil import move
+# ./translate.py
+
 import time
 from datetime import datetime
 
@@ -12,9 +13,24 @@ from utils import TranslatePose, moves_to_keystroke, input_keys
 
 
 def translate(
-    log_flag=False, live_flag=False, debug_level=0, log_fps=20,
-    camera_port="0", motion_threshold_invese_factor=48
+    log_flag=True, live_flag=False, debug_level=0, log_fps=20,
+    camera_port="0", motion_threshold_factor=48
 ):
+    '''
+    function translate input settings for camera, captures frames accordingly,
+    process the captured frame and types the associated keystroke.
+
+    log_flag <bool>: if True, it stores the video_log in "logs" folder
+    live_flag <bool>: if True, it displays the captured video
+    log_fps <int>: FPS Setting for video_log
+    camera_port <str>: select the port, can be url address or port number in str
+    motion_threshold_factor <int>: More the value is, More the Motion is Captured
+    debug_level <int> -> <0 | 1 | 2 | 3>:
+        - 0: Raw Video Footage
+        - 1: 0 + FPS and Output Moves
+        - 2: 1 + Virtual Exoskeleton of Body Parts Found
+        - 3: 2 + Black Screen if no motion found
+    '''
     camera_port = int(camera_port) if camera_port.isdigit() else camera_port
 
     translate_pose = TranslatePose()
@@ -27,21 +43,22 @@ def translate(
 
     height, width, channel = prv_img.shape
 
-    motion_theshold = height * width * channel * 255 // motion_threshold_invese_factor
+    # More the value is, More the Motion is Captured
+    motion_theshold = height * width * channel * 255 // motion_threshold_factor
 
+    # MediaPipe Pose
     pose = mp_pose.Pose()
 
     if log_flag:
+        # Intialise VideoWriter for logs in `./logs/` folder
         video_log = cv2.VideoWriter(
             f"logs/log_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.avi",
             cv2.VideoWriter_fourcc(*"XVID"), log_fps, (width, height)
         )
-
-    if log_flag:
         video_log.write(prv_img)
 
-
     if debug_level > 0:
+        # FPS and Output Moves setting
         cur_time = 0
         cv_font_vars_outline = (cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 4)
         cv_font_vars = (cv2.FONT_HERSHEY_PLAIN, 2, (255,0, 0), 2)
@@ -51,59 +68,76 @@ def translate(
 
     while cv2.waitKey(1) & 0xFF != 27:
         if debug_level > 0:
+            # Update prv_time for FPS
             prv_time = cur_time
 
+        # Set to false for Each Frame
         motion_detected = False
 
+        # Grabs image form Capturing Device
         _, img = camera.read()
 
+        # Frame differencing for motion detection
         diff_img = cv2.absdiff(img, prv_img)
 
+        # Compare the sum of pixel after differencing with initalized theshold
         if diff_img.flatten().sum() > motion_theshold:
             motion_detected = True
 
+        # same img for next comparsion
         prv_img = img.copy()
 
-        pose_landmarks = pose.process(
-            cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        ).pose_landmarks
+        if motion_detected:
+            # MediaPipe finds marker for all body parts
+            pose_landmarks = pose.process(
+                cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            ).pose_landmarks
 
         movelist = []
         if motion_detected and pose_landmarks:
+            # Using Coordinates, Deduces the Move(s)
             movelist = translate_pose.process(pose_landmarks.landmark)
+
+            # Using Move(s), returns the associated key
             inputs = moves_to_keystroke(movelist)
+
+            # Uses pyAutoGUI to input the key(s)
             input_keys(inputs)
 
         if debug_level > 0:
             cur_time = time.time()
 
-        if debug_level > 1 and pose_landmarks:
-            mp_drawing_utils.draw_landmarks(
-                img, pose_landmarks, mp_pose.POSE_CONNECTIONS
-            )
+            if debug_level > 1 and motion_detected and pose_landmarks:
+                mp_drawing_utils.draw_landmarks(
+                    img, pose_landmarks, mp_pose.POSE_CONNECTIONS
+                )
 
-        if debug_level > 2 and not motion_detected:
-            img = diff_img
+            if debug_level > 2 and not motion_detected:
+                img = diff_img
 
-        if debug_level > 0:
+            # FPS: 1 frame  / time taken to process a whole frame
             fps = 1/(cur_time - prv_time)
 
+            # FPS and Output Moves Output
             cv2.putText(img, f"{fps:.2f}", fps_coord, *cv_font_vars_outline)
             cv2.putText(img, f"{fps:.2f}", fps_coord, *cv_font_vars)
 
             cv2.putText(img, f"{list(movelist)}", movelist_coord, *cv_font_vars_outline)
             cv2.putText(img, f"{list(movelist)}", movelist_coord, *cv_font_vars)
 
-
+        # live_flag is set to True, Display the captured image
         if live_flag:
             cv2.imshow("Pose2Input-MKKE", img)
 
+        # log_flag is set to True, Store the captured image
         if log_flag:
             video_log.write(img)
 
+    # Closes Capturing Device
     camera.release()
 
     if log_flag:
+        # Closes Video Writer
         video_log.release()
 
     # Closes all the frames

@@ -1,3 +1,5 @@
+# ./constants.py
+
 import os
 import enum
 
@@ -9,6 +11,13 @@ load_dotenv()
 
 @enum.unique
 class InputConfig(enum.Enum):
+    '''
+    Config for the gameplay, Takes input from .env
+    Value should be something tha can be used by pyAutoGUI
+    If not available then, uses default input config (mine)
+    and Yes I use arrow keys, deal with it!
+    '''
+    DEFAULT = ''
     UP = os.getenv('UP', 'up').lower()
     DOWN = os.getenv('DOWN', 'down').lower()
     LEFT = os.getenv('LEFT', 'left').lower()
