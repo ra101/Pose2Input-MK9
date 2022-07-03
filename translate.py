@@ -4,19 +4,16 @@ import time
 from datetime import datetime
 
 import cv2
-from mediapipe.python.solutions import(
-    drawing_utils as mp_drawing_utils,
-    pose as mp_pose
-)
+import mediapipe.python.solutions as mp
 
-from utils import TranslatePose, moves_to_keystroke, input_keys
+from utils import TranslatePose, moves_to_keystroke, input_keys, UNUSED_LANDMARKS
 
 
 def translate(
     log_flag=True, live_flag=False, debug_level=0, log_fps=20,
     camera_port="0", motion_threshold_factor=48
 ):
-    '''
+    """
     function translate input settings for camera, captures frames accordingly,
     process the captured frame and types the associated keystroke.
 
@@ -30,7 +27,8 @@ def translate(
         - 1: 0 + FPS and Output Moves
         - 2: 1 + Virtual Exoskeleton of Body Parts Found
         - 3: 2 + Black Screen if no motion found
-    '''
+    """
+
     camera_port = int(camera_port) if camera_port.isdigit() else camera_port
 
     translate_pose = TranslatePose()
@@ -47,7 +45,7 @@ def translate(
     motion_theshold = height * width * channel * 255 // motion_threshold_factor
 
     # MediaPipe Pose
-    pose = mp_pose.Pose()
+    pose = mp.pose.Pose()
 
     if log_flag:
         # Intialise VideoWriter for logs in `./logs/` folder
@@ -95,6 +93,11 @@ def translate(
 
         movelist = []
         if motion_detected and pose_landmarks:
+
+            # removing lankmarks that will not be used futher:
+            for mark in UNUSED_LANDMARKS:
+                pose_landmarks.landmark[mark].visibility = 0
+
             # Using Coordinates, Deduces the Move(s)
             movelist = translate_pose.process(pose_landmarks.landmark)
 
@@ -108,8 +111,8 @@ def translate(
             cur_time = time.time()
 
             if debug_level > 1 and motion_detected and pose_landmarks:
-                mp_drawing_utils.draw_landmarks(
-                    img, pose_landmarks, mp_pose.POSE_CONNECTIONS
+                mp.drawing_utils.draw_landmarks(
+                    img, pose_landmarks, mp.pose.POSE_CONNECTIONS
                 )
 
             if debug_level > 2 and not motion_detected:

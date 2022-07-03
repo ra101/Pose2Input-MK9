@@ -8,41 +8,59 @@ from mediapipe.python.solutions.pose import (
     PoseLandmark as LandmarkIndexEnum
 )
 
+
+UNUSED_LANDMARKS = (
+    LandmarkIndexEnum.LEFT_EYE, LandmarkIndexEnum.RIGHT_EYE,
+    LandmarkIndexEnum.LEFT_EAR, LandmarkIndexEnum.RIGHT_EAR,
+    LandmarkIndexEnum.LEFT_HEEL, LandmarkIndexEnum.RIGHT_HEEL,
+    LandmarkIndexEnum.MOUTH_LEFT, LandmarkIndexEnum.MOUTH_RIGHT,
+    LandmarkIndexEnum.LEFT_PINKY, LandmarkIndexEnum.RIGHT_PINKY,
+    LandmarkIndexEnum.LEFT_INDEX, LandmarkIndexEnum.RIGHT_INDEX,
+    LandmarkIndexEnum.LEFT_THUMB, LandmarkIndexEnum.RIGHT_THUMB,
+    LandmarkIndexEnum.LEFT_EYE_INNER, LandmarkIndexEnum.RIGHT_EYE_INNER,
+    LandmarkIndexEnum.LEFT_EYE_OUTER, LandmarkIndexEnum.RIGHT_EYE_OUTER,
+    LandmarkIndexEnum.LEFT_FOOT_INDEX, LandmarkIndexEnum.RIGHT_FOOT_INDEX,
+)
+
+
 def input_keys(inputs):
-    '''
+    """
     press the given list of keys in ordered fashion
     pyautogui: uses keyDown and keyUp
     Not using pyautogui.hotkey as it not recognize by many applications
 
     input <list<str:PyAutoGUI recognizes key string>>
-    '''
+    """
+
     for key in inputs:
         pyautogui.keyDown(key)
     for key in reversed(inputs):
         pyautogui.keyUp(key)
 
 def moves_to_keystroke(movelist):
-    '''
+    """
     Uses InputConfig to return list of keys from given moves in movelist
 
     movelist <list<str:move>>
-    '''
+    """
+
     return [
         getattr(InputConfig, move, 'DEFAULT').value for move in movelist
     ]
 
 class TranslatePose:
-    '''
+    """
     Using Coordinates of body parts, this class can deduces the Move(s)/Pose(s)
-    '''
+    """
 
     def __init__(self):
-        '''
+        """
         Initalise a list of all the functions that starts with "move_"
         all these fuctions return bool for associated moves.
         functions and moves are associated in the format move_<move_name>
         help(TranslatePose.move_sample) to get how to make a move function
-        '''
+        """
+
         self.all_transaltion_funcs = [
             getattr(self, i) for i in dir(self) if i.startswith('move_')
         ]
@@ -50,17 +68,18 @@ class TranslatePose:
         self.visibility_threshold = 0.9
 
     def process(self, landmark_list):
-        '''
+        """
         pass landmark_list to all the functions in
         self.all_transaltion_funcs, and create a set of possible moves
-        '''
+        """
+
         return set([
             func.__name__[5:].upper()
                 for func in self.all_transaltion_funcs if func(landmark_list)
         ])
 
     def move_sample(self, landmark_list):
-        '''
+        """
         sample function, bases for all `move_` functions
 
         # Input
@@ -86,12 +105,13 @@ class TranslatePose:
             perform mathematical operations on x,y cordinates to determine pose
                 always usew ratio or angles, as they are independent of camera distance
             # return True or False accordingly
-        '''
+        """
 
     def move_up(self, landmark_list):
-        '''
+        """
         ankles should be above knees
-        '''
+        """
+
         r_ankle = landmark_list[LandmarkIndexEnum.RIGHT_ANKLE]
         l_ankle=landmark_list[LandmarkIndexEnum.LEFT_ANKLE]
         r_knee = landmark_list[LandmarkIndexEnum.RIGHT_KNEE]
@@ -108,9 +128,10 @@ class TranslatePose:
         return False
 
     def move_down(self, landmark_list):
-        '''
+        """
         dist(hip->nose) : dist(hip->knee) > 7 : 10
-        '''
+        """
+
         r_hip = landmark_list[LandmarkIndexEnum.RIGHT_HIP]
         l_hip=landmark_list[LandmarkIndexEnum.LEFT_HIP]
         r_knee = landmark_list[LandmarkIndexEnum.RIGHT_KNEE]
@@ -135,10 +156,11 @@ class TranslatePose:
         return False
 
     def move_left(self, landmark_list):
-        '''
+        """
         (perpendicular of r_ankle->l_ankle) should be right of right hip
         slope(right_hip->ankle) for both ankles should be b/w -65° and -115°
-        '''
+        """
+
         return self._move_x_direction(
             r_ankle=landmark_list[LandmarkIndexEnum.RIGHT_ANKLE],
             l_ankle=landmark_list[LandmarkIndexEnum.LEFT_ANKLE],
@@ -147,10 +169,11 @@ class TranslatePose:
         )
 
     def move_right(self, landmark_list):
-        '''
+        """
         (perpendicular of r_ankle->l_ankle) should be left of left hip
         slope(left_hip->ankle) for both ankles should be b/w -65° and -115°
-        '''
+        """
+
         return self._move_x_direction(
             r_ankle=landmark_list[LandmarkIndexEnum.RIGHT_ANKLE],
             l_ankle=landmark_list[LandmarkIndexEnum.LEFT_ANKLE],
@@ -161,9 +184,10 @@ class TranslatePose:
     def _move_x_direction(
         self, r_ankle, l_ankle, hip, right=True
     ):
-        '''
+        """
         common implementation for move_left and move_right
-        '''
+        """
+
         if np.average([
             r_ankle.visibility, l_ankle.visibility, hip.visibility
         ]) < self.visibility_threshold:
@@ -184,11 +208,12 @@ class TranslatePose:
         return False
 
     def move_front_punch(self, landmark_list):
-        '''
+        """
         slope(left_shoulder->left_wirst) should be b/w -10.5° and 10.5°
         angle(left_shoulder<-left_elbow->left_wirst) should be b/w 169.5° and 190.5°
         TLDR: arm should parallel to ground
-        '''
+        """
+
         return self._move_punch(
             wrist=landmark_list[LandmarkIndexEnum.LEFT_WRIST],
             elbow=landmark_list[LandmarkIndexEnum.LEFT_ELBOW],
@@ -196,11 +221,12 @@ class TranslatePose:
         )
 
     def move_back_punch(self, landmark_list):
-        '''
+        """
         slope(right_shoulder->right_wirst) should be b/w -10.5° and 10.5°
         angle(right_shoulder<-right_elbow->right_wirst) should be b/w 169.5° and 190.5°
         TLDR: arm should parallel to ground
-        '''
+        """
+
         return self._move_punch(
             wrist=landmark_list[LandmarkIndexEnum.RIGHT_WRIST],
             elbow=landmark_list[LandmarkIndexEnum.RIGHT_ELBOW],
@@ -208,9 +234,10 @@ class TranslatePose:
         )
 
     def _move_punch(self, wrist, elbow, shoulder):
-        '''
+        """
         common implementation for move_front_punch and move_back_punch
-        '''
+        """
+
         if np.average([
             elbow.visibility, wrist.visibility, shoulder.visibility
         ]) < self.visibility_threshold:
@@ -228,27 +255,30 @@ class TranslatePose:
         return False
 
     def move_front_kick(self, landmark_list):
-        '''
+        """
         slope(left_ankle->left_hip) should be b/w 45° and 135°
-        '''
+        """
+
         return self._move_kick(
             hip=landmark_list[LandmarkIndexEnum.LEFT_HIP],
             ankle=landmark_list[LandmarkIndexEnum.LEFT_ANKLE],
         )
 
     def move_back_kick(self, landmark_list):
-        '''
+        """
         slope(right_ankle->right_hip) should be b/w 45° and 135°
-        '''
+        """
+
         return self._move_kick(
             hip=landmark_list[LandmarkIndexEnum.RIGHT_HIP],
             ankle=landmark_list[LandmarkIndexEnum.RIGHT_ANKLE],
         )
 
     def _move_kick(self, hip, ankle):
-        '''
+        """
         common implementation for move_front_kick and move_back_kick
-        '''
+        """
+
         if np.average([hip.visibility, ankle.visibility]) < self.visibility_threshold:
             return False
 
@@ -259,9 +289,10 @@ class TranslatePose:
         return False
 
     def move_throw(self, landmark_list):
-        '''
+        """
         wrist should be above elbow of same arm, they both should be above nose
-        '''
+        """
+
         nose = landmark_list[LandmarkIndexEnum.NOSE]
         if nose.visibility < self.visibility_threshold:
             return False
@@ -281,12 +312,13 @@ class TranslatePose:
         return False
 
     def move_tag(self, landmark_list):
-        '''
+        """
         angle(left_elbow<-wirsts->right_elbow) should be b/w 169.5° and 190.5°
         TLDR: forearms should parallel to ground
 
         dist(wrists) : dist(elbows) < 3 : 10
-        '''
+        """
+
         r_wrist = landmark_list[LandmarkIndexEnum.RIGHT_WRIST]
         r_elbow = landmark_list[LandmarkIndexEnum.RIGHT_ELBOW]
         l_wrist = landmark_list[LandmarkIndexEnum.LEFT_WRIST]
@@ -312,9 +344,10 @@ class TranslatePose:
         return False
 
     def move_block(self, landmark_list):
-        '''
+        """
         wrist should be above nose, they both should be above elbow of same arm
-        '''
+        """
+
         nose = landmark_list[LandmarkIndexEnum.NOSE]
         if nose.visibility < self.visibility_threshold:
             return False
@@ -334,19 +367,19 @@ class TranslatePose:
         return False
 
     # def move_flip_stance(self, landmark_list):
-    #     '''
+    #     """
     #     Not Gonna Implement
-    #     '''
+    #     """
     #     return False
 
     # def move_pause(self, landmark_list):
-    #     '''
+    #     """
     #     Not Gonna Implement
-    #     '''
+    #     """
     #     return False
 
     # def move_back(self, landmark_list):
-    #     '''
+    #     """
     #     Not Gonna Implement
-    #     '''
+    #     """
     #     return False
