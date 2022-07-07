@@ -58,8 +58,8 @@ def translate(
     if debug_level > 0:
         # FPS and Output Moves setting
         cur_time = 0
-        cv_font_vars_outline = (cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 4)
-        cv_font_vars = (cv2.FONT_HERSHEY_PLAIN, 2, (255,0, 0), 2)
+        cv_font_vars_outline = (cv2.FONT_HERSHEY_PLAIN, 1.7, (192, 44, 44), 3)
+        cv_font_vars = (cv2.FONT_HERSHEY_PLAIN, 1.7, (245,66,66), 2)
         fps_coord = (width - 100, 50)
         movelist_coord = (50, height - 50)
 
@@ -112,14 +112,16 @@ def translate(
 
             if debug_level > 1 and motion_detected and pose_landmarks:
                 mp.drawing_utils.draw_landmarks(
-                    img, pose_landmarks, mp.pose.POSE_CONNECTIONS
+                    img, pose_landmarks, mp.pose.POSE_CONNECTIONS,
+                    mp.drawing_utils.DrawingSpec(color=(66,66,245)),
+                    mp.drawing_utils.DrawingSpec(color=(66,245,66))
                 )
 
             if debug_level > 2 and not motion_detected:
                 img = diff_img
 
             # FPS: 1 frame  / time taken to process a whole frame
-            fps = 1/(cur_time - prv_time)
+            fps = 1/(cur_time - prv_time)  if (cur_time - prv_time) !=0 else 0
 
             # FPS and Output Moves Output
             cv2.putText(img, f"{fps:.2f}", fps_coord, *cv_font_vars_outline)
