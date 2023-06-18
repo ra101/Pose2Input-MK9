@@ -18,7 +18,7 @@ if __name__ == "__main__":
     pyautogui.PAUSE = float(os.getenv('PYAUTO_PAUSE', 0.1))
 
     parser = argparse.ArgumentParser(
-        prog="Pose2Input-MKKE",
+        prog="Pose2Input-MK9",
         description="Translate the Video Input to Keystrokes"
     )
     parser.add_argument(

@@ -4,7 +4,7 @@
 </p>
 
 
-<img src="https://img.shields.io/badge/Made%20with-Python-feab00?style=for-the-badge&logo=python" alt="Made with Python"> <a href="https://github.com/ra101/Pose2Input-MKKE/stargazers"><img src="https://img.shields.io/github/stars/ra101/Pose2Input-MKKE?style=for-the-badge" alt="Stars"></a> <a href="https://github.com/ra101/Pose2Input-MKKE/network/members"><img src="https://img.shields.io/github/forks/ra101/Pose2Input-MKKE?style=for-the-badge" alt="Forks"></a> <a href="https://github.com/ra101/Pose2Input-MKKE/issues"><img src="https://img.shields.io/github/issues/ra101/Pose2Input-MKKE?style=for-the-badge" alt="Open Issues"></a> <img src="https://img.shields.io/badge/Open%20Source-%E2%98%95-red?style=for-the-badge&logo=open-source-initiative" alt="Open Source Love"> <img src="https://img.shields.io/badge/Built%20With-%E2%99%A1-critical?style=for-the-badge&logo=github" alt="Built with Love">
+<img src="https://img.shields.io/badge/Made%20with-Python-feab00?style=for-the-badge&logo=python" alt="Made with Python"> <a href="https://github.com/ra101/Pose2Input-MK9/stargazers"><img src="https://img.shields.io/github/stars/ra101/Pose2Input-MK9?style=for-the-badge" alt="Stars"></a> <a href="https://github.com/ra101/Pose2Input-MK9/network/members"><img src="https://img.shields.io/github/forks/ra101/Pose2Input-MK9?style=for-the-badge" alt="Forks"></a> <a href="https://github.com/ra101/Pose2Input-MK9/issues"><img src="https://img.shields.io/github/issues/ra101/Pose2Input-MK9?style=for-the-badge" alt="Open Issues"></a> <img src="https://img.shields.io/badge/Open%20Source-%E2%98%95-red?style=for-the-badge&logo=open-source-initiative" alt="Open Source Love"> <img src="https://img.shields.io/badge/Built%20With-%E2%99%A1-critical?style=for-the-badge&logo=github" alt="Built with Love">
 
 </div>
 
@@ -62,13 +62,13 @@ Lets start the standard procedure for python project setup.
 - Clone the repository
 
 ```bash
-$ git clone https://github.com/ra101/Pose2Input-MKKE.git
+$ git clone https://github.com/ra101/Pose2Input-MK9.git
 ```
 
 - Create the virtualenv and activate it
 
 ```bash
-$ cd Pose2Input-MKKE
+$ cd Pose2Input-MK9
 $ virtualenv venv
 $ source ./venv/bin/activate # unix
 $ .\venv\Scripts\activate.bat  # windows
@@ -164,13 +164,13 @@ $ python run.py --debug_level 3 --live_flag --log_flag
 
 ## 🌟Credit/Acknowledgment
 
-[![Contributors](https://img.shields.io/github/contributors/ra101/Pose2Input-MKKE?style=for-the-badge)](https://github.com/ra101/Pose2Input-MKKE/graphs/contributors)
+[![Contributors](https://img.shields.io/github/contributors/ra101/Pose2Input-MK9?style=for-the-badge)](https://github.com/ra101/Pose2Input-MK9/graphs/contributors)
 
 <br>
 
 ## 📜License
 
-[![License](https://img.shields.io/github/license/ra101/Pose2Input-MKKE?style=for-the-badge)](https://github.com/ra101/Pose2Input-MKKE/blob/core/LICENSE)
+[![License](https://img.shields.io/github/license/ra101/Pose2Input-MK9?style=for-the-badge)](https://github.com/ra101/Pose2Input-MK9/blob/core/LICENSE)
 
 <br>
 

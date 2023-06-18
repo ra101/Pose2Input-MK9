@@ -132,7 +132,7 @@ def translate(
 
         # live_flag is set to True, Display the captured image
         if live_flag:
-            cv2.imshow("Pose2Input-MKKE", img)
+            cv2.imshow("Pose2Input-MK9", img)
 
         # log_flag is set to True, Store the captured image
         if log_flag:
